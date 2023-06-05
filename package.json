@@ -1,0 +1,23 @@
+{
+  "name": "tikaone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pkg": "npm ci ; tsc ; pkg ./index.js -o exe -t node18-alpine-x64"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@logi.one/rest-client": "^0.2.4",
+    "express": "^4.18.2",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.2.5",
+    "pkg": "^5.8.1",
+    "typescript": "^5.1.3"
+  }
+}
