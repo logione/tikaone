@@ -17,6 +17,7 @@ type Body = z.infer<typeof Body>
 app.put('/', async (req: Request, res: Response) => {
   const body =  Body.safeParse(req.body)
   if (!body.success) {
+    console.warn('NODE:', body.error)
     return res.sendStatus(400)
   }
 
@@ -24,6 +25,7 @@ app.put('/', async (req: Request, res: Response) => {
     const text = await extractText(body.data)
     res.send({ text })
   } catch (err: any) {
+    console.error('NODE:', err)
     if (err?.status) {
       res.sendStatus(err.status)
     } else {
@@ -33,7 +35,7 @@ app.put('/', async (req: Request, res: Response) => {
 })
 
 app.listen(port, () => {
-  console.log(`Listening on port ${port}`)
+  console.log('NODE:', `Listening on port ${port}`)
 })
 
 async function extractText(body: Body, nTry = 0): Promise<string> {
@@ -53,7 +55,6 @@ async function extractText(body: Body, nTry = 0): Promise<string> {
     return text.replace(/\s+/g,' ').slice(0, body.maxLength)
   } catch (err: any) {
     if (err.code !== 'ECONNREFUSED' && nTry < 3000) {
-      console.log(err)
       throw err
     }
     await new Promise(resolve => setTimeout(resolve, 20))
