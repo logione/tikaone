@@ -9,7 +9,7 @@ const port = 3000
 
 const Body = z.object({
   url: z.string().url(),
-  ocr: z.boolean().transform(t => t.toString()),
+  ocr: z.boolean(),
   maxLength: z.number().min(1)
 })
 type Body = z.infer<typeof Body>
@@ -47,12 +47,12 @@ async function extractText(body: Body, nTry = 0): Promise<string> {
         headers: { 
           'accept': 'text/plain',
           'X-Tika-OCRLanguage': 'eng',
-          'X-Tika-OCRskipOcr': body.ocr 
+          'X-Tika-OCRskipOcr': body.ocr ? 'false' : 'true'
         }
       }
     )
     const text = await streamToString(tikaResponse)
-    return text.replace(/\s+/g,' ').slice(0, body.maxLength)
+    return text.trim().replace(/\s+/g,' ').slice(0, body.maxLength)
   } catch (err: any) {
     if (err.code !== 'ECONNREFUSED' && nTry < 3000) {
       throw err
