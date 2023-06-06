@@ -1,0 +1,13 @@
+services:
+  app:
+    build: ./docker/dev
+    init: true
+    working_dir: /workspace
+    entrypoint: "/copy-ssh.sh"
+    restart: "no"
+    volumes:
+    - type: bind
+      source: /var/run/docker.sock
+      target: /var/run/docker.sock
+    - ${HOME}/.ssh:/tmp/.ssh:ro
+    - .:/workspace

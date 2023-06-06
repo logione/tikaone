@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "pkg": "npm ci ; tsc ; pkg ./index.js -o exe -t node18-alpine-x64"
+    "pkg": "npm ci ; tsc ; pkg ./index.js -o exe -t node18-alpine-x64",
+    "build": "tsc",
+    "build-watch": "tsc --watch",
+    "docker-up": "docker compose -f compose-dev.yaml up -d",
+    "docker-stop": "docker compose -f compose-dev.yaml stop"
   },
   "author": "",
   "license": "ISC",
