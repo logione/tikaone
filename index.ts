@@ -21,8 +21,16 @@ app.put('/', async (req: Request, res: Response) => {
     return res.sendStatus(400)
   }
 
-  const text = await extractText(body.data)
-  res.send({ text })
+  try {
+    const text = await extractText(body.data)
+    res.send({ text })
+  } catch (err: any) {
+    if (err?.status) {
+      res.sendStatus(err.status)
+    } else {
+      res.sendStatus(500)
+    }
+  }
 })
 
 app.listen(port, () => {
