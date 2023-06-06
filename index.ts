@@ -26,7 +26,7 @@ app.put('/', async (req: Request, res: Response) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Listening on port ${port}`)
 })
 
 async function extractText(body: Body, nTry = 0): Promise<string> {
