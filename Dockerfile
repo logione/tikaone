@@ -1,6 +1,6 @@
 FROM alpine:3.18
 
-RUN apk add --no-cache openjdk17-jre-headless tesseract-ocr tesseract-ocr-data-eng tesseract-ocr-data-fra tini
+RUN apk add --no-cache openjdk17-jre-headless tesseract-ocr tesseract-ocr-data-eng tini
 
 WORKDIR /app
 COPY tika-server-standard-2.8.0.jar .

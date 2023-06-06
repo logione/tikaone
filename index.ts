@@ -10,7 +10,6 @@ const port = 3000
 const Body = z.object({
   url: z.string().url(),
   ocr: z.boolean().transform(t => t.toString()),
-  language: z.union([ z.literal('fr'), z.literal('en') ]).transform(l => l === 'en' ? 'eng' : 'fra'),
   maxLength: z.number().min(1)
 })
 type Body = z.infer<typeof Body>
@@ -45,7 +44,7 @@ async function extractText(body: Body, nTry = 0): Promise<string> {
       stream, { 
         headers: { 
           'accept': 'text/plain',
-          'X-Tika-OCRLanguage': body.language,
+          'X-Tika-OCRLanguage': 'eng',
           'X-Tika-OCRskipOcr': body.ocr 
         }
       }
@@ -73,5 +72,5 @@ function streamToString (stream: IncomingMessage): Promise<string> {
 
 /* 
 USAGE: 
-curl --header "Content-Type: application/json" --request PUT --data '{ "ocr": false, "language": "fr", "maxLength": 100000, "url":"https://sos-ch-gva-2.exo.io/public-logione/2023%20Energiapro%20Gaz%2005-062023%201083775.pdf" }' http://localhost:3000
+curl --header "Content-Type: application/json" --request PUT --data '{ "ocr": false, "maxLength": 100000, "url":"https://sos-ch-gva-2.exo.io/public-logione/2023%20Energiapro%20Gaz%2005-062023%201083775.pdf" }' http://localhost:3000
   */
