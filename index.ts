@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express'
-import { getStream, putStream } from '@logi.one/rest-client'
+import { getStream, putStream, get } from '@logi.one/rest-client'
 import { IncomingMessage } from 'http'
 import { z } from 'zod'
 
@@ -15,6 +15,7 @@ const Body = z.object({
 type Body = z.infer<typeof Body>
 
 app.put('/', async (req: Request, res: Response) => {
+  const now = +new Date()
   const body =  Body.safeParse(req.body)
   if (!body.success) {
     console.warn('NODE:', body.error)
@@ -23,6 +24,7 @@ app.put('/', async (req: Request, res: Response) => {
 
   try {
     const text = await extractText(body.data)
+    console.log(`NODE: PUT / { ocr: ${body.data.ocr}, maxLength: ${body.data.maxLength} } => Text: ${text.length}bytes, in ${+new Date() - now}ms`)
     res.send({ text })
   } catch (err: any) {
     console.error('NODE:', err)
@@ -34,32 +36,26 @@ app.put('/', async (req: Request, res: Response) => {
   }
 })
 
-app.listen(port, () => {
-  console.log('NODE:', `Listening on port ${port}`)
+waitingForTikaToStart().then(() => {
+  app.listen(port, () => {
+    console.log('NODE:', `Listening on port ${port}`)
+  })
 })
 
-async function extractText(body: Body, nTry = 0): Promise<string> {
+async function extractText(body: Body): Promise<string> {
   const stream = await getStream(body.url)
-  try {
-    const tikaResponse = await putStream(
-      'http://localhost:9998/tika',
-      stream, { 
-        headers: { 
-          'accept': 'text/plain',
-          'X-Tika-OCRLanguage': 'eng',
-          'X-Tika-OCRskipOcr': body.ocr ? 'false' : 'true'
-        }
+  const tikaResponse = await putStream(
+    'http://localhost:9998/tika',
+    stream, { 
+      headers: { 
+        'accept': 'text/plain',
+        'X-Tika-OCRLanguage': 'eng',
+        'X-Tika-OCRskipOcr': body.ocr ? 'false' : 'true'
       }
-    )
-    const text = await streamToString(tikaResponse)
-    return text.trim().replace(/\s+/g,' ').slice(0, body.maxLength)
-  } catch (err: any) {
-    if (err.code !== 'ECONNREFUSED' && nTry < 3000) {
-      throw err
     }
-    await new Promise(resolve => setTimeout(resolve, 20))
-    return await extractText(body, ++nTry) 
-  }
+  )
+  const text = await streamToString(tikaResponse)
+  return text.trim().replace(/\s+/g,' ').slice(0, body.maxLength)
 }
 
 function streamToString (stream: IncomingMessage): Promise<string> {
@@ -69,6 +65,23 @@ function streamToString (stream: IncomingMessage): Promise<string> {
     stream.on('error', (err) => reject(err))
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
   })
+}
+
+async function waitingForTikaToStart(): Promise<void> {
+  console.time('NODE: waiting tika to start')
+  let started = false
+  while (!started) {
+    try {
+      await get('http://localhost:9998/version')
+      started = true
+    } catch (err: any) {
+      if (err?.cause?.code !== 'ECONNREFUSED') {
+        console.error(err?.cause)
+      }
+      await new Promise(resolve => setTimeout(resolve, 20))
+    }
+  }
+  console.timeEnd('NODE: waiting tika to start')
 }
 
 /* 
