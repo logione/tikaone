@@ -5,10 +5,9 @@ RUN apk add --no-cache openjdk17-jre tesseract-ocr tesseract-ocr-data-eng tini
 WORKDIR /app
 COPY tika-server-standard-2.8.0.jar .
 COPY exe .
-COPY start.sh .
-RUN chmod +x /app/start.sh
+RUN chmod +x /app/exe
 
 EXPOSE 3000
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["/app/start.sh"]
+CMD ["/app/exe"]

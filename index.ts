@@ -1,11 +1,12 @@
 import express, { Request, Response } from 'express'
-import { getStream, putStream, get } from '@logi.one/rest-client'
-import { IncomingMessage } from 'http'
+import { getStream } from '@logi.one/rest-client'
 import { z } from 'zod'
+import { TikaClient } from './tika-client'
 
 const app = express()
 app.use(express.json())
 const port = 3000
+const client = new TikaClient()
 
 const Body = z.object({
   url: z.string().url(),
@@ -23,7 +24,8 @@ app.put('/', async (req: Request, res: Response) => {
   }
 
   try {
-    const text = await extractText(body.data)
+    const stream = await getStream(body.data.url)
+    const text = await client.extractText(stream, body.data.ocr, body.data.maxLength)
     console.log(`NODE: PUT / { ocr: ${body.data.ocr}, maxLength: ${body.data.maxLength} } => Text: ${text.length}bytes, in ${+new Date() - now}ms`)
     res.send({ text })
   } catch (err: any) {
@@ -36,53 +38,9 @@ app.put('/', async (req: Request, res: Response) => {
   }
 })
 
-waitingForTikaToStart().then(() => {
-  app.listen(port, () => {
-    console.log('NODE:', `Listening on port ${port}`)
-  })
+app.listen(port, () => {
+  console.log('NODE:', `Listening on port ${port}`)
 })
-
-async function extractText(body: Body): Promise<string> {
-  const stream = await getStream(body.url)
-  const tikaResponse = await putStream(
-    'http://localhost:9998/tika',
-    stream, { 
-      headers: { 
-        'accept': 'text/plain',
-        'X-Tika-OCRLanguage': 'eng',
-        'X-Tika-OCRskipOcr': body.ocr ? 'false' : 'true'
-      }
-    }
-  )
-  const text = await streamToString(tikaResponse)
-  return text.trim().replace(/\s+/g,' ').slice(0, body.maxLength)
-}
-
-function streamToString (stream: IncomingMessage): Promise<string> {
-  const chunks: Buffer[] = [];
-  return new Promise((resolve, reject) => {
-    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)))
-    stream.on('error', (err) => reject(err))
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
-  })
-}
-
-async function waitingForTikaToStart(): Promise<void> {
-  console.time('NODE: waiting tika to start')
-  let started = false
-  while (!started) {
-    try {
-      await get('http://localhost:9998/version')
-      started = true
-    } catch (err: any) {
-      if (err?.cause?.code !== 'ECONNREFUSED') {
-        console.error(err?.cause)
-      }
-      await new Promise(resolve => setTimeout(resolve, 20))
-    }
-  }
-  console.timeEnd('NODE: waiting tika to start')
-}
 
 /* 
 USAGE: 
