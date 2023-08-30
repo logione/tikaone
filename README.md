@@ -19,5 +19,6 @@ docker build . --no-cache -t europe-west6-docker.pkg.dev/logione-doc/public/tika
 docker push europe-west6-docker.pkg.dev/logione-doc/public/tikaone
 
 # cloud-run
-gcloud run deploy tikaone --image=europe-west6-docker.pkg.dev/logione-doc/public/tikaone --max-instances=20 --concurrency=1 --memory=768Mi --port=3000 --no-allow-unauthenticated --region=europe-west6 --platform=managed --execution-environment gen2
+gcloud run deploy tikaone --image=europe-west6-docker.pkg.dev/logione-doc/public/tikaone --max-instances=30 --concurrency=1 --memory=1024Mi --port=3000 --no-allow-unauthenticated --region=europe-west6 --platform=managed --execution-environment gen2
+```
 ```
