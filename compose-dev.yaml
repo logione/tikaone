@@ -1,7 +1,6 @@
 services:
   app:
-    build: ./docker/dev
-    init: true
+    image: yenyen/vs-code:node-gcloud
     working_dir: /workspace
     entrypoint: "/copy-ssh.sh"
     restart: "no"
