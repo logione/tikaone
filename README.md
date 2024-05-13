@@ -1,6 +1,15 @@
 
 # TikaONE
 
+## Dependencies
+
+
+### tika server
+
+```bash
+wget https://dlcdn.apache.org/tika/2.9.2/tika-server-standard-2.9.2.jar
+```
+
 ## Deploy
 
 ```bash

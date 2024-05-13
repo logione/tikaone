@@ -35,7 +35,7 @@ export class TikaClient {
     }
 
     private async startTika() {
-        exec('java -jar tika-server-standard-2.9.0.jar').on('exit', (code) => {
+        exec('java -jar tika-server-standard-2.9.2.jar').on('exit', (code) => {
             console.error(`NODE: Tika exited with code: ${code} - restarting`)
             this.startingPromise = this.startTika()
         })
