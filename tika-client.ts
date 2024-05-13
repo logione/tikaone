@@ -12,7 +12,7 @@ export class TikaClient {
         await this.startingPromise
         try {
             const tikaResponse = await putStream(
-                'http://localhost:9998/tika',
+                'http://127.0.0.1:9998/tika',
                 stream, { 
                     headers: { 
                     'accept': 'text/plain',
@@ -43,7 +43,7 @@ export class TikaClient {
         let started = false
         for (let i = 0; i < 1500 && !started; i++) {
             try {
-                await get('http://localhost:9998/version')
+                await get('http://127.0.0.1:9998/version')
                 started = true
             } catch (err: any) {
                 if (err?.cause?.code !== 'ECONNREFUSED') {
