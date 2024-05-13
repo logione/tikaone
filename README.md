@@ -3,6 +3,17 @@
 
 ## Dependencies
 
+### node
+
+```bash
+wget https://unofficial-builds.nodejs.org/download/release/v20.13.1/node-v20.13.1-linux-x64-musl.tar.gz
+tar -xf *.tar.gz
+# danger !
+rm *.tar.gz
+mv node-v*/bin/node node
+# danger !
+rm -rf node-v*
+```
 
 ### tika server
 
@@ -36,7 +47,7 @@ gcloud run deploy tikaone --image=europe-west6-docker.pkg.dev/logione-doc/public
 ```bash
 npm run pkg
 docker build -t tikaone .
-docker run -it --rm -p 3000:3000 tikaone
+docker run -it --rm -p 3000:3000 --name tikaone-test tikaone 
 
-node stormfree.js
+node stormfree.mjs
 ```
