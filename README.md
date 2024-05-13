@@ -6,10 +6,7 @@
 ### node
 
 ```bash
-wget https://unofficial-builds.nodejs.org/download/release/v20.13.1/node-v20.13.1-linux-x64-musl.tar.gz
-tar -xf *.tar.gz
-# danger !
-rm *.tar.gz
+wget -qO- https://unofficial-builds.nodejs.org/download/release/v20.13.1/node-v20.13.1-linux-x64-musl.tar.gz | tar xvz
 mv node-v*/bin/node node
 # danger !
 rm -rf node-v*
