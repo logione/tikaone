@@ -6,9 +6,9 @@
 ### node
 
 ```bash
-wget -qO- https://unofficial-builds.nodejs.org/download/release/v20.13.1/node-v20.13.1-linux-x64-musl.tar.gz | tar xvz
+VERSION="20.13.1"
+wget -qO- https://unofficial-builds.nodejs.org/download/release/v$VERSION/node-v$VERSION-linux-x64-musl.tar.gz | tar xvz
 mv node-v*/bin/node node
-# danger !
 rm -rf node-v*
 ```
 
