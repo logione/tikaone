@@ -1,5 +1,9 @@
 name: Tag staging as production
 
+permissions:
+  packages: write
+  contents: read
+
 on:
   workflow_dispatch:
 
