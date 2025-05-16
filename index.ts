@@ -3,6 +3,7 @@ import { getStream } from '@logi.one/rest-client'
 import { z } from 'zod'
 import { extractText } from './tika-client'
 import { env } from './env'
+import { Server } from 'http'
 
 const app = express()
 app.use(express.json())
@@ -37,9 +38,35 @@ app.put('/', async (req: Request, res: Response) => {
   }
 })
 
-app.listen(env.PORT, () => {
+async function close() {
+  process.removeAllListeners('SIGINT')
+  process.removeAllListeners('SIGTERM')
+  if (server) {
+    console.log('Closing server')
+    const srv = server
+    server = undefined
+    await new Promise<void>((resolve, reject) => {
+      srv.close((err) => {
+        if (err) {
+          console.error('Error closing server', err)
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
+    console.log('Server closed gracefully')
+  } else {
+    console.warn('Server already closed')
+  }
+}
+
+let server: Server | undefined = app.listen(env.PORT, () => {
   console.log(`Listening on port ${env.PORT}`)
 })
+
+process.on('SIGINT', () => close())
+process.on('SIGTERM', () => close())
 
 /* 
 USAGE: 
