@@ -1,13 +1,15 @@
-FROM alpine:3.18
-
-RUN apk add --no-cache openjdk17-jre tesseract-ocr tesseract-ocr-data-eng tini
-
+FROM node:22-alpine3.21 AS build
 WORKDIR /app
-COPY tika-server-standard-2.9.2.jar .
-COPY exe .
-RUN chmod +x /app/exe
+COPY . .
+RUN npm ci
+RUN npx esbuild ./index.ts  --bundle --minify --legal-comments=none --platform=node --target=node22 --outdir=.
+
+FROM node:22-alpine3.21
+RUN apk add tini --no-cache
+WORKDIR /app
+COPY --from=build /app/index.js .
 
 EXPOSE 3000
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["/app/exe"]
+CMD ["node", "index.js"]

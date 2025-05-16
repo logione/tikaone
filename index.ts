@@ -1,12 +1,11 @@
 import express, { Request, Response } from 'express'
 import { getStream } from '@logi.one/rest-client'
 import { z } from 'zod'
-import { TikaClient } from './tika-client'
+import { extractText } from './tika-client'
+import { env } from './env'
 
 const app = express()
 app.use(express.json())
-const port = 3000
-const client = new TikaClient()
 
 const Body = z.object({
   url: z.string().url(),
@@ -19,17 +18,17 @@ app.put('/', async (req: Request, res: Response) => {
   const now = +new Date()
   const body =  Body.safeParse(req.body)
   if (!body.success) {
-    console.warn('NODE:', body.error)
+    console.warn(body.error)
     return res.sendStatus(400)
   }
 
   try {
     const stream = await getStream(body.data.url)
-    const text = await client.extractText(stream, body.data.ocr, body.data.maxLength)
-    console.log(`NODE: PUT / { ocr: ${body.data.ocr}, maxLength: ${body.data.maxLength} } => Text: ${text.length}bytes, in ${+new Date() - now}ms`)
+    const text = await extractText(stream, body.data.ocr, body.data.maxLength)
+    console.log(`PUT / { ocr: ${body.data.ocr}, maxLength: ${body.data.maxLength} } => Text: ${text.length}bytes, in ${+new Date() - now}ms`)
     res.send({ text })
   } catch (err: any) {
-    console.error('NODE:', err)
+    console.error(err)
     if (err?.status) {
       res.sendStatus(err.status)
     } else {
@@ -38,8 +37,8 @@ app.put('/', async (req: Request, res: Response) => {
   }
 })
 
-app.listen(port, () => {
-  console.log('NODE:', `Listening on port ${port}`)
+app.listen(env.PORT, () => {
+  console.log(`Listening on port ${env.PORT}`)
 })
 
 /* 
