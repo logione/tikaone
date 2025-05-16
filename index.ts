@@ -41,27 +41,21 @@ app.put('/', async (req: Request, res: Response) => {
 async function close() {
   process.removeAllListeners('SIGINT')
   process.removeAllListeners('SIGTERM')
-  if (server) {
-    console.log('Closing server')
-    const srv = server
-    server = undefined
-    await new Promise<void>((resolve, reject) => {
-      srv.close((err) => {
-        if (err) {
-          console.error('Error closing server', err)
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
+  console.log('Closing server')
+  await new Promise<void>((resolve, reject) => {
+    server.close((err) => {
+      if (err) {
+        console.error('Error closing server', err)
+        reject(err)
+      } else {
+        resolve()
+      }
     })
-    console.log('Server closed gracefully')
-  } else {
-    console.warn('Server already closed')
-  }
+  })
+  console.log('Server closed gracefully')
 }
 
-let server: Server | undefined = app.listen(env.PORT, () => {
+const server = app.listen(env.PORT, () => {
   console.log(`Listening on port ${env.PORT}`)
 })
 
